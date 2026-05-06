@@ -133,6 +133,7 @@
   let currentTab = "cards"; // "cards" | "recipes" | "gems" | "unlocks"
   let currentViewMode = "grid"; // "grid" | "list"
   const rendered = { cards: false, recipes: false, gems: false, unlocks: false };
+  const lastVisibleCount = { cards: 0, recipes: 0, gems: 0, unlocks: 0 };
 
   // === 隐藏所有标签页 ===
   function hideAllSections() {
@@ -174,6 +175,7 @@
       renderUnlockFilterBar();
       if (!rendered.unlocks) { renderUnlocksSection(); rendered.unlocks = true; }
     }
+    updateStats(lastVisibleCount[tab]);
   }
 
   function initTabs() {
@@ -308,6 +310,7 @@
       });
     }
 
+    lastVisibleCount.cards = filtered.length;
     updateStats(filtered.length);
   }
 
@@ -442,6 +445,7 @@
     RECIPES.forEach(recipe => {
       container.appendChild(buildRecipeCard(recipe));
     });
+    lastVisibleCount.recipes = RECIPES.length;
     updateStats(RECIPES.length);
   }
 
@@ -555,6 +559,7 @@
       });
     }
 
+    lastVisibleCount.unlocks = filtered.length;
     updateStats(filtered.length);
   }
 
@@ -676,6 +681,7 @@
       });
     }
 
+    lastVisibleCount.gems = filtered.length;
     updateStats(filtered.length);
   }
 
