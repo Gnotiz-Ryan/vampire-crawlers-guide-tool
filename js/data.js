@@ -167,22 +167,22 @@ const CARDS = [
 // 数据来源：https://vampire.survivors.wiki/w/Crawlers:Evolution
 // ═══════════════════════════════════════
 const RECIPES = [
-  { result: "bloody_tear", materials: ["whip", "hollow_heart"], count: { whip: 1, hollow_heart: 1 }, note: "进化：神鞭 + 空虚之心" },
+  { result: "bloody_tear", materials: ["whip", "hollow_heart"], count: { whip: 1, hollow_heart: 1 }, alternatives: { hollow_heart: ["forever_heart"] }, note: "进化：神鞭 + 空虚之心" },
   { result: "thousand_edge", materials: ["knife", "bracer"], count: { knife: 1, bracer: 1 }, note: "进化：飞刀 + 护腕" },
-  { result: "holy_wand", materials: ["magic_wand", "empty_tome"], count: { magic_wand: 1, empty_tome: 1 }, note: "进化：强能魔杖 + 空白之书" },
+  { result: "holy_wand", materials: ["magic_wand", "empty_tome"], count: { magic_wand: 1, empty_tome: 1 }, alternatives: { empty_tome: ["light_tome", "weighty_tome", "ancient_tome"] }, note: "进化：强能魔杖 + 空白之书" },
   { result: "unholy_vespers", materials: ["king_bible", "spellbinder"], count: { king_bible: 1, spellbinder: 1 }, note: "进化：国王圣经 + 咒缚盒" },
-  { result: "hellfire", materials: ["fire_wand", "spinach"], count: { fire_wand: 1, spinach: 1 }, note: "进化：火焰魔杖 + 菠菜" },
-  { result: "soul_eater", materials: ["garlic", "pummarola"], count: { garlic: 1, pummarola: 1 }, note: "进化：大蒜 + 愈伤番茄" },
-  { result: "death_spiral", materials: ["axe", "candelabrador"], count: { axe: 1, candelabrador: 1 }, note: "进化：斧头 + 烛台" },
+  { result: "hellfire", materials: ["fire_wand", "spinach"], count: { fire_wand: 1, spinach: 1 }, alternatives: { spinach: ["sprig_o_spinach"] }, note: "进化：火焰魔杖 + 菠菜" },
+  { result: "soul_eater", materials: ["garlic", "pummarola"], count: { garlic: 1, pummarola: 1 }, alternatives: { pummarola: ["pummadora"] }, note: "进化：大蒜 + 愈伤番茄" },
+  { result: "death_spiral", materials: ["axe", "candelabrador"], count: { axe: 1, candelabrador: 1 }, alternatives: { candelabrador: ["candle", "candella"] }, note: "进化：斧头 + 烛台" },
   { result: "heaven_sword", materials: ["cross", "clover"], count: { cross: 1, clover: 1 }, note: "进化：十字飞镖 + 四叶草" },
-  { result: "thunder_loop", materials: ["lightning_ring", "duplicator"], count: { lightning_ring: 1, duplicator: 1 }, note: "进化：闪电戒指 + 双鸾宝镯" },
-  { result: "no_future", materials: ["runetracer", "armor"], count: { runetracer: 1, armor: 1 }, note: "进化：痕印石 + 防御" },
+  { result: "thunder_loop", materials: ["lightning_ring", "duplicator"], count: { lightning_ring: 1, duplicator: 1 }, alternatives: { duplicator: ["du_duplicator"] }, note: "进化：闪电戒指 + 双鸾宝镯" },
+  { result: "no_future", materials: ["runetracer", "armor"], count: { runetracer: 1, armor: 1 }, alternatives: { armor: ["golden_armor", "rainbow_armor", "heros_armor"] }, note: "进化：痕印石 + 防御" },
   { result: "la_borra", materials: ["santa_water", "attractorb"], count: { santa_water: 1, attractorb: 1 }, note: "进化：圣徒水 + 念力法球" },
   { result: "vicious_hunger", materials: ["gatti_amari", "stone_mask"], count: { gatti_amari: 1, stone_mask: 1 }, note: "进化：彪悍猫 + 石面具" },
   { result: "mannajja", materials: ["song_of_mana", "skull_o_maniac"], count: { song_of_mana: 1, skull_o_maniac: 1 }, note: "进化：魔力歌谣 + 疯狂骷髅" },
   { result: "valkyrie_turner", materials: ["shadow_pinion", "wings"], count: { shadow_pinion: 1, wings: 1 }, note: "进化：暗影螺钉 + 翅膀" },
-  { result: "gorgeous_moon", materials: ["pentagram", "crown"], count: { pentagram: 1, crown: 1 }, note: "进化：五芒星 + 王冠" },
-  { result: "phieraggi", materials: ["eight_the_sparrow", "phiera_der_tuphello"], count: { eight_the_sparrow: 1, phiera_der_tuphello: 1 }, note: "合一：麻雀小八 + 图菲罗街市" },
+  { result: "gorgeous_moon", materials: ["pentagram", "crown"], count: { pentagram: 1, crown: 1 }, alternatives: { crown: ["crystal_crown"] }, note: "进化：五芒星 + 王冠" },
+  { result: "phieraggi", materials: ["eight_the_sparrow", "phiera_der_tuphello", "tirajisu"], count: { eight_the_sparrow: 1, phiera_der_tuphello: 1, tirajisu: 1 }, note: "合一：麻雀小八 + 图菲罗街市 + 提拉吉苏" },
   { result: "vandalier", materials: ["peachone", "ebony_wings"], count: { peachone: 1, ebony_wings: 1 }, note: "合一：白鸽 + 黑翼" }
 ];
 

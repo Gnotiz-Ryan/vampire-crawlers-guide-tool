@@ -395,8 +395,10 @@
       if (alts[matId] && Array.isArray(alts[matId])) {
         const group = document.createElement("div");
         group.style.cssText = "display:flex;align-items:center;gap:2px;";
-        alts[matId].forEach((altId, i) => {
-          if (i > 0) { const s = document.createElement("span"); s.style.cssText="font-size:10px;color:#c62828;margin:0 1px;"; s.textContent="/"; group.appendChild(s); }
+        const mainEl = createMaterialEl(matId, size, (e) => { e.stopPropagation(); openModal(matId); });
+        if (mainEl) group.appendChild(mainEl);
+        alts[matId].forEach((altId) => {
+          const s = document.createElement("span"); s.style.cssText="font-size:10px;color:#c62828;margin:0 1px;"; s.textContent="/"; group.appendChild(s);
           const el = createMaterialEl(altId, size, (e) => { e.stopPropagation(); openModal(altId); });
           if (el) group.appendChild(el);
         });
@@ -727,8 +729,10 @@
         recipe.materials.forEach(matId => {
           if (alts[matId] && Array.isArray(alts[matId])) {
             html += '<div style="display:flex;align-items:center;gap:2px;">';
-            alts[matId].forEach((altId, i) => {
-              if (i > 0) html += '<span style="font-size:10px;color:#c62828;">/</span>';
+            const main = getCard(matId);
+            if (main) html += buildMiniCard(matId, main, recipe.count[matId] || 1);
+            alts[matId].forEach((altId) => {
+              html += '<span style="font-size:10px;color:#c62828;">/</span>';
               const alt = getCard(altId);
               if (alt) html += buildMiniCard(altId, alt, 1);
             });
