@@ -3,39 +3,64 @@
 (function () {
   "use strict";
 
+  // === 预计算索引 ===
+  const CARD_MAP = new Map(CARDS.map(c => [c.id, c]));
+  
+  const RECIPES_BY_RESULT = new Map();
+  const RECIPES_BY_MATERIAL = new Map();
+
+  for (const r of RECIPES) {
+    // 结果索引
+    if (!RECIPES_BY_RESULT.has(r.result)) {
+      RECIPES_BY_RESULT.set(r.result, []);
+    }
+    RECIPES_BY_RESULT.get(r.result).push(r);
+
+    // 材料索引
+    const materials = new Set(r.materials);
+    if (r.alternatives) {
+      for (const key in r.alternatives) {
+        const alts = r.alternatives[key];
+        if (Array.isArray(alts)) {
+          alts.forEach(a => materials.add(a));
+        }
+      }
+    }
+    
+    for (const mat of materials) {
+      if (!RECIPES_BY_MATERIAL.has(mat)) {
+        RECIPES_BY_MATERIAL.set(mat, []);
+      }
+      RECIPES_BY_MATERIAL.get(mat).push(r);
+    }
+  }
+
   // === 工具函数 ===
   function getCard(id) {
-    return CARDS.find(c => c.id === id);
+    return CARD_MAP.get(id);
   }
 
   function getRecipesForCard(cardId) {
-    return RECIPES.filter(r => r.result === cardId);
+    return RECIPES_BY_RESULT.get(cardId) || [];
   }
 
   function getRecipesUsingCard(cardId) {
-    return RECIPES.filter(r => {
-      if (r.materials.includes(cardId)) return true;
-      if (r.alternatives) {
-        for (const key in r.alternatives) {
-          const alts = r.alternatives[key];
-          if (Array.isArray(alts) && alts.includes(cardId)) return true;
-        }
-      }
-      return false;
-    });
+    return RECIPES_BY_MATERIAL.get(cardId) || [];
   }
 
   // 拼音首字母匹配
-  function matchPinyin(cardId, query) {
-    const py = PINYIN_MAP[cardId];
-    return py && py.includes(query);
+  function matchPinyin(name, query) {
+    if (window.PinyinMatch) {
+      return !!PinyinMatch.match(name, query);
+    }
+    return false;
   }
 
   // 搜索匹配（中文名 + 英文id + 拼音首字母）
   function matchSearch(card, query) {
     if (!query) return true;
-    if (card.name.includes(query) || card.id.includes(query)) return true;
-    return matchPinyin(card.id, query);
+    if (card.name.toLowerCase().includes(query) || card.id.toLowerCase().includes(query)) return true;
+    return matchPinyin(card.name, query);
   }
 
   // 搜索匹配配方（成品名、材料名、拼音）
@@ -82,6 +107,7 @@
     wrapper.style.margin = "0 auto";
 
     const img = document.createElement("img");
+        img.loading = "lazy";
     img.src = card.image;
     img.alt = card.name;
     img.style.width = size + "px";
@@ -239,6 +265,7 @@
     grid.innerHTML = "";
     grid.classList.toggle("list-view", currentViewMode === "list");
 
+    const frag = document.createDocumentFragment();
     let filtered = CARDS.filter(c => {
       return matchSearch(c, currentSearch)
         && (currentCategory === "全部" || c.category === currentCategory)
@@ -251,7 +278,7 @@
       filtered.forEach(card => {
         const el = document.createElement("div");
         el.className = "card-item rarity-" + (card.rarity || "common");
-        el.addEventListener("click", () => openModal(card.id));
+        el.dataset.id = card.id;
         el.appendChild(createCardImage(card, 80));
 
         // 列表视图：将名称、属性、可合成放入左侧内容区
@@ -306,8 +333,9 @@
         catEl.textContent = card.category || "";
         el.appendChild(catEl);
 
-        grid.appendChild(el);
+        frag.appendChild(el);
       });
+      grid.appendChild(frag);
     }
 
     lastVisibleCount.cards = filtered.length;
@@ -495,6 +523,7 @@
     document.getElementById("manaFilterBar").style.display = "none";
     renderUnlockFilterBar();
 
+    const frag = document.createDocumentFragment();
     let filtered = UNLOCKS.filter(u => {
       const matchCat = currentUnlockCategory === "全部" || u.category === currentUnlockCategory;
       const matchSearch = !currentSearch
@@ -503,7 +532,7 @@
         || u.description.toLowerCase().includes(currentSearch)
         || (u.unlocks && u.unlocks.toLowerCase().includes(currentSearch))
         || u.id.includes(currentSearch)
-        || (UNLOCK_PINYIN_MAP[u.id] && UNLOCK_PINYIN_MAP[u.id].includes(currentSearch));
+        || matchPinyin(u.name, currentSearch);
       return matchCat && matchSearch;
     });
 
@@ -516,6 +545,7 @@
 
         // Image with fallback
         const img = document.createElement("img");
+        img.loading = "lazy";
         img.src = unlock.image;
         img.alt = unlock.name;
         const placeholder = document.createElement("div");
@@ -557,8 +587,9 @@
         catEl.textContent = unlock.category;
         el.appendChild(catEl);
 
-        grid.appendChild(el);
+        frag.appendChild(el);
       });
+      grid.appendChild(frag);
     }
 
     lastVisibleCount.unlocks = filtered.length;
@@ -614,13 +645,14 @@
     document.getElementById("manaFilterBar").style.display = "none";
     renderGemFilterBar();
 
+    const frag = document.createDocumentFragment();
     let filtered = GEMS.filter(g => {
       const matchRarity = currentGemRarity === "全部" || g.rarity === currentGemRarity;
       const matchSearch = !currentSearch
         || g.name.toLowerCase().includes(currentSearch)
         || g.effect.toLowerCase().includes(currentSearch)
         || g.id.includes(currentSearch)
-        || (GEM_PINYIN_MAP[g.id] && GEM_PINYIN_MAP[g.id].includes(currentSearch));
+        || matchPinyin(g.name, currentSearch);
       return matchRarity && matchSearch;
     });
 
@@ -640,6 +672,7 @@
 
         // Image with fallback
         const img = document.createElement("img");
+        img.loading = "lazy";
         img.src = gem.image;
         img.alt = gem.name;
         const placeholder = document.createElement("div");
@@ -679,8 +712,9 @@
         rarityEl.style.cssText = `background:${rc}22;color:${rc};`;
         el.appendChild(rarityEl);
 
-        grid.appendChild(el);
+        frag.appendChild(el);
       });
+      grid.appendChild(frag);
     }
 
     lastVisibleCount.gems = filtered.length;
@@ -845,7 +879,7 @@
       g.name.toLowerCase().includes(currentSearch)
       || g.effect.toLowerCase().includes(currentSearch)
       || g.id.includes(currentSearch)
-      || (GEM_PINYIN_MAP[g.id] && GEM_PINYIN_MAP[g.id].includes(currentSearch))
+      || matchPinyin(g.name, currentSearch)
     );
     // 搜解锁项
     const matchedUnlocks = UNLOCKS.filter(u =>
@@ -854,7 +888,7 @@
       || u.description.toLowerCase().includes(currentSearch)
       || (u.unlocks && u.unlocks.toLowerCase().includes(currentSearch))
       || u.id.includes(currentSearch)
-      || (UNLOCK_PINYIN_MAP[u.id] && UNLOCK_PINYIN_MAP[u.id].includes(currentSearch))
+      || matchPinyin(u.name, currentSearch)
     );
 
     const total = matchedCards.length + matchedRecipes.length + matchedGems.length + matchedUnlocks.length;
@@ -877,7 +911,7 @@
       matchedCards.forEach(card => {
         const el = document.createElement("div");
         el.className = "card-item rarity-" + (card.rarity || "common");
-        el.addEventListener("click", () => openModal(card.id));
+        el.dataset.id = card.id;
         el.appendChild(createCardImage(card, 80));
         const isListView = currentViewMode === "list";
         const infoEl = isListView ? document.createElement("div") : null;
@@ -928,6 +962,7 @@
         const el = document.createElement("div");
         el.className = "gem-item";
         const img = document.createElement("img");
+        img.loading = "lazy";
         img.src = gem.image;
         img.alt = gem.name;
         const placeholder = document.createElement("div");
@@ -974,6 +1009,7 @@
         const el = document.createElement("div");
         el.className = "unlock-item";
         const img = document.createElement("img");
+        img.loading = "lazy";
         img.src = unlock.image;
         img.alt = unlock.name;
         const placeholder = document.createElement("div");
@@ -1039,6 +1075,30 @@
     });
   }
 
+  // === 更新日志弹窗 ===
+  function initChangelog() {
+    const changelogOverlay = document.getElementById("changelogOverlay");
+    const changelogClose = document.getElementById("changelogClose");
+    const changelogOkBtn = document.getElementById("changelogOkBtn");
+
+    if (!changelogOverlay) return;
+
+    function closeChangelog() {
+      changelogOverlay.classList.remove("active");
+      localStorage.setItem("vampire_crawlers_v1.1_changelog", "shown");
+    }
+
+    changelogClose.addEventListener("click", closeChangelog);
+    changelogOkBtn.addEventListener("click", closeChangelog);
+    changelogOverlay.addEventListener("click", (e) => {
+      if (e.target.id === "changelogOverlay") closeChangelog();
+    });
+
+    if (!localStorage.getItem("vampire_crawlers_v1.1_changelog")) {
+      changelogOverlay.classList.add("active");
+    }
+  }
+
   // === 初始化 ===
   function initGemRarityToggle() {
     const toggle = document.getElementById("gemRarityToggle");
@@ -1053,6 +1113,24 @@
   }
 
   function init() {
+
+    document.getElementById("cardGrid").addEventListener("click", (e) => {
+      const item = e.target.closest(".card-item");
+      if (item && item.dataset.id) openModal(item.dataset.id);
+    });
+    document.getElementById("unlockGrid").addEventListener("click", (e) => {
+      const item = e.target.closest(".unlock-item");
+      if (item && item.dataset.id) openModal(item.dataset.id);
+    });
+    document.getElementById("gemGrid").addEventListener("click", (e) => {
+      const item = e.target.closest(".gem-item");
+      if (item && item.dataset.id) openModal(item.dataset.id);
+    });
+    document.getElementById("globalSearchSection").addEventListener("click", (e) => {
+      const item = e.target.closest(".card-item, .unlock-item, .gem-item");
+      if (item && item.dataset.id) openModal(item.dataset.id);
+    });
+
     initTabs();
     initSearch();
     initModalOverlay();
@@ -1060,6 +1138,7 @@
     initViewToggle();
     renderFilterBar();
     renderCardGrid();
+    initChangelog();
   }
 
   if (document.readyState === "loading") {
